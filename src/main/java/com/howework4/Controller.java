@@ -72,6 +72,7 @@ public class Controller {
     void sendMessage() {
         String messageSend = textArea.getText();
         String strDate = new SimpleDateFormat("dd.MM hh:mm").format(new Date());
+        //dynamically created HBox that represents individual message
         if (!messageSend.isEmpty()) {
             HBox messageBox = new HBox();
             messageBox.setAlignment(Pos.CENTER_RIGHT);
@@ -106,13 +107,12 @@ public class Controller {
 
     @FXML
     void initialize() {
-
         userInitialization();
     }
 
     private void userInitialization() {
         ArrayList<String> users = new ArrayList<>();
-        Collections.addAll(users, "Almas", "Bot", "Admin", "Bob");
+        Collections.addAll(users, "Almas", "Bot", "Admin", "Bob", "Someone");
 
         users.forEach((u) -> {
             HBox userBox = new HBox();
