@@ -113,7 +113,10 @@ public class Controller {
     private void userInitialization() {
         ArrayList<String> users = new ArrayList<>();
         Collections.addAll(users, "Almas", "Bot", "Admin", "Bob", "Someone");
-
+        /*
+        For users the procedure is the same as for messages the difference is that we have arraylist
+        of the users that we add at the same time to the GUI
+        */
         users.forEach((u) -> {
             HBox userBox = new HBox();
             userBox.setAlignment(Pos.CENTER_LEFT);
