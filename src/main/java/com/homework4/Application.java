@@ -1,5 +1,7 @@
-package com.howework4;
+package com.homework4;
 
+import com.homework4.controllers.Controller;
+import com.homework4.models.Network;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -14,6 +16,14 @@ public class Application extends javafx.application.Application {
         stage.setTitle("Chat");
         stage.setScene(scene);
         stage.show();
+
+        Network network = new Network();
+        Controller controller = fxmlLoader.getController();
+
+        controller.setNetwork(network);
+
+        network.connect();
+        network.waitMessage(controller);
     }
 
     public static void main(String[] args) {

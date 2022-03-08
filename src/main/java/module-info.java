@@ -10,6 +10,8 @@ module gb.demo.lesson4.lesson4 {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
 
-    opens com.howework4 to javafx.fxml;
-    exports com.howework4;
+    opens com.homework4 to javafx.fxml;
+    exports com.homework4;
+    exports com.homework4.controllers;
+    opens com.homework4.controllers to javafx.fxml;
 }
