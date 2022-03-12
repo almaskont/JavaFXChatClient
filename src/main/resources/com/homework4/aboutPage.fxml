@@ -5,7 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="318.0" prefWidth="519.0" style="-fx-background-color: rgb(28, 101, 140);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.howework4.Controller">
+<AnchorPane prefHeight="318.0" prefWidth="519.0" style="-fx-background-color: rgb(28, 101, 140);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.homework4.controllers.Controller">
    <children>
       <Label layoutX="34.0" layoutY="44.0" prefHeight="208.0" prefWidth="442.0" text="This application has been made by Almas Kontorbayev as a part of JavaFX practise. It represents client side of a chat application. " textAlignment="JUSTIFY" textFill="#eeeeee" textOverrun="CLIP" wrapText="true" />
       <Button fx:id="closeAboutButton" layoutX="445.0" layoutY="278.0" mnemonicParsing="false" onAction="#closeAboutPage" style="-fx-background-color: rgb(216, 210, 203);" text="Close" textFill="#398ab9">

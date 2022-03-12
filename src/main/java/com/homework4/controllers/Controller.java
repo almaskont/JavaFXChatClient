@@ -1,5 +1,9 @@
-package com.howework4;
+package com.homework4.controllers;
 
+import com.homework4.Application;
+import com.homework4.models.Network;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -59,10 +63,16 @@ public class Controller {
 
     private Stage stage = new Stage();
 
+    private Network network;
+
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
+
     @FXML
     void onEnter() {
         textArea.setOnKeyPressed(keyEvent -> {
-            if(keyEvent.getCode() == KeyCode.ENTER) {
+            if (keyEvent.getCode() == KeyCode.ENTER) {
                 sendMessage();
             }
         });
@@ -70,28 +80,51 @@ public class Controller {
 
     @FXML
     void sendMessage() {
-        String messageSend = textArea.getText();
-        String strDate = new SimpleDateFormat("dd.MM hh:mm").format(new Date());
+        String messageSend = textArea.getText().trim();
+        textArea.clear();
         //dynamically created HBox that represents individual message
         if (!messageSend.isEmpty()) {
-            HBox messageBox = new HBox();
-            messageBox.setAlignment(Pos.CENTER_RIGHT);
-            messageBox.setPadding(new Insets(5, 10, 5, 10));
-            Text text = new Text(messageSend + "\n\t" + strDate);
-            TextFlow textFlow = new TextFlow(text);
-            textFlow.setStyle("-fx-color: rgb(238, 238, 238); " +
-                    "-fx-background-color: rgb(57, 138, 185); " +
-                    "-fx-background-radius: 15px;");
-            textFlow.setPadding(new Insets(5,10,5,10));
-            text.setFill(Color.color(0.934, 0.945, 0.996));
-            messageBox.getChildren().add(textFlow);
-            messageBoard.getChildren().add(messageBox);
-            textArea.clear();
+            network.sendMessage(messageSend);
+            appendMessage(messageSend);
         }
+    }
+
+    public void appendMessage(String messageSend) {
+        String strDate = new SimpleDateFormat("dd.MM HH:mm").format(new Date());
+        HBox messageBox = new HBox();
+        messageBox.setAlignment(Pos.CENTER_RIGHT);
+        messageBox.setPadding(new Insets(5, 10, 5, 10));
+        Text text = new Text(messageSend + "\n\t" + strDate);
+        TextFlow textFlow = new TextFlow(text);
+        textFlow.setStyle("-fx-color: rgb(238, 238, 238); " +
+                "-fx-background-color: rgb(45, 49, 250); " +
+                "-fx-background-radius: 15px;");
+        textFlow.setPadding(new Insets(5, 10, 5, 10));
+        text.setFill(Color.color(0.934, 0.945, 0.996));
+        messageBox.getChildren().add(textFlow);
+        Platform.runLater(() -> messageBoard.getChildren().add(messageBox));
         messageScroll.vvalueProperty().bind(messageBoard.heightProperty());
     }
+
+    public void appendServerMessage(String messageSend) {
+        String strDate = new SimpleDateFormat("dd.MM HH:mm").format(new Date());
+        HBox messageBox = new HBox();
+        messageBox.setAlignment(Pos.CENTER_LEFT);
+        messageBox.setPadding(new Insets(5, 10, 5, 10));
+        Text text = new Text(messageSend + "\n\t" + strDate);
+        TextFlow textFlow = new TextFlow(text);
+        textFlow.setStyle("-fx-color: rgb(238, 238, 238); " +
+                "-fx-background-color: rgb(93, 139, 244); " +
+                "-fx-background-radius: 15px;");
+        textFlow.setPadding(new Insets(5, 10, 5, 10));
+        text.setFill(Color.color(0.934, 0.945, 0.996));
+        messageBox.getChildren().add(textFlow);
+        Platform.runLater(() -> messageBoard.getChildren().add(messageBox));
+        messageScroll.vvalueProperty().bind(messageBoard.heightProperty());
+    }
+
     @FXML
-    void onAbout(ActionEvent event) throws IOException {
+    void onAbout() throws IOException {
         FXMLLoader aboutPageLoader = new FXMLLoader(Application.class.getResource("aboutPage.fxml"));
         stage.setScene(new Scene(aboutPageLoader.load()));
         stage.showAndWait();
@@ -124,8 +157,8 @@ public class Controller {
             Text userName = new Text(u);
             TextFlow textFlow = new TextFlow(userName);
             textFlow.setStyle("-fx-color: rgb(238, 238, 238); " +
-                    "-fx-background-color: rgb(28, 101, 140); ");
-            textFlow.setPadding(new Insets(5,10,5,10));
+                    "-fx-background-color: rgb(45, 49, 250); ");
+            textFlow.setPadding(new Insets(5, 10, 5, 10));
             userName.setFill(Color.color(0.934, 0.945, 0.996));
             HBox.setHgrow(textFlow, Priority.ALWAYS);
             userBox.getChildren().add(textFlow);
