@@ -9,6 +9,7 @@ module gb.demo.lesson4.lesson4 {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
+    requires lombok;
 
     opens com.homework4 to javafx.fxml;
     exports com.homework4;
