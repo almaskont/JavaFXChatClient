@@ -2,31 +2,44 @@ package com.homework4.controllers;
 
 import com.homework4.Application;
 import com.homework4.models.Network;
+import com.homework4.server.authentication.AuthenticationService;
+import com.homework4.server.authentication.BaseAuthenticationService;
+import com.homework4.server.handler.ClientHandler;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
 public class Controller {
+
+    @FXML
+    private ListView<String> usersList;
+
+    private String selectedRecipient;
 
     @FXML
     private Button sendMessageButton;
@@ -59,6 +72,9 @@ public class Controller {
     private VBox usersNames = new VBox();
 
     @FXML
+    private Label userName;
+
+    @FXML
     private Button closeAboutButton;
 
     private Stage stage = new Stage();
@@ -82,10 +98,13 @@ public class Controller {
     void sendMessage() {
         String messageSend = textArea.getText().trim();
         textArea.clear();
-        //dynamically created HBox that represents individual message
-        if (!messageSend.isEmpty()) {
+
+        if (messageSend.trim().isEmpty()) return;
+
+        if (selectedRecipient != null) {
+            network.sendPrivateMessage(selectedRecipient, messageSend);
+        } else {
             network.sendMessage(messageSend);
-            appendMessage(messageSend);
         }
     }
 
@@ -140,29 +159,65 @@ public class Controller {
 
     @FXML
     void initialize() {
-        userInitialization();
+        usersList.setCellFactory(lv -> {
+            MultipleSelectionModel<String> selectionModel = usersList.getSelectionModel();
+            ListCell<String> cell = new ListCell<>();
+            cell.textProperty().bind(cell.itemProperty());
+            cell.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+                usersList.requestFocus();
+                if (!cell.isEmpty()) {
+                    int index = cell.getIndex();
+                    if (selectionModel.getSelectedIndices().contains(index)) {
+                        selectionModel.clearSelection(index);
+                        selectedRecipient = null;
+                    } else {
+                        selectionModel.select(index);
+                        selectedRecipient = cell.getItem();
+                    }
+                    event.consume();
+                }
+            });
+            return cell;
+        });
+
+//        aboutButton.setOnAction((event) -> {
+//            FXMLLoader root;
+//            try {
+//                root = FXMLLoader.load(Application.class.getResource("aboutPage.fxml"));
+//                Stage stage = new Stage();
+//                Scene about = new Scene(root.load());
+//                stage.initModality(Modality.WINDOW_MODAL);
+//                stage.setTitle("About");
+//                stage.setScene(about);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        });
+//
+//        closeAboutButton.setOnAction( (event) -> {
+//            stage = (Stage) closeAboutButton.getScene().getWindow();
+//            if (event.getTarget() == closeAboutButton) {
+//                stage.close();
+//            }
+//        });
     }
 
-    private void userInitialization() {
-        ArrayList<String> users = new ArrayList<>();
-        Collections.addAll(users, "Almas", "Bot", "Admin", "Bob", "Someone");
-        /*
-        For users the procedure is the same as for messages the difference is that we have arraylist
-        of the users that we add at the same time to the GUI
-        */
-        users.forEach((u) -> {
-            HBox userBox = new HBox();
-            userBox.setAlignment(Pos.CENTER_LEFT);
-            userBox.setPadding(new Insets(5, 10, 5, 10));
-            Text userName = new Text(u);
-            TextFlow textFlow = new TextFlow(userName);
-            textFlow.setStyle("-fx-color: rgb(238, 238, 238); " +
-                    "-fx-background-color: rgb(45, 49, 250); ");
-            textFlow.setPadding(new Insets(5, 10, 5, 10));
-            userName.setFill(Color.color(0.934, 0.945, 0.996));
-            HBox.setHgrow(textFlow, Priority.ALWAYS);
-            userBox.getChildren().add(textFlow);
-            usersNames.getChildren().add(userBox);
-        });
+    public void updateUsersList(String[] users) {
+
+        Arrays.sort(users);
+
+        for (int i = 0; i < users.length; i++) {
+            if (users[i].equals(network.getUsername())) {
+                users[i] = ">>> " + users[i];
+            }
+        }
+
+        usersList.getItems().clear();
+        Collections.addAll(usersList.getItems(), users);
     }
+
+    public void setUsernameTitle(String username) {
+        this.userName.setText(username);
+    }
+
 }

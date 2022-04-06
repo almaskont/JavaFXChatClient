@@ -69,33 +69,54 @@ public class ChatServer {
         return authenticationService;
     }
 
-    public synchronized void broadcastMessage(String message, ClientHandler sender) throws IOException {
+    public synchronized void broadcastMessage(String message, ClientHandler sender, boolean isServerMessage) throws IOException {
         for (ClientHandler client : clients) {
             if (client == sender) {
                 continue;
             }
-            client.sendMessage(sender.getUsername(), message);
+            client.sendMessage(isServerMessage ? null : sender.getUsername(), message);
         }
     }
 
+    public synchronized void broadcastMessage(String message, ClientHandler sender) throws IOException {
+        broadcastMessage(message, sender, false);
+    }
+
     public synchronized void privateMessage(String message, ClientHandler sender) throws IOException {
-        String[] messageArray = message.split("\\s");
+        String[] messageArray = message.split("\\s", 3);
         if (messageArray.length < 3) {
             sender.sendMessage(sender.getUsername(), "вы отправили пустое сообщение");
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        for (int i = 2; i < messageArray.length; i++) {
-            sb.append(messageArray[i]);
-            sb.append(" ");
-        }
-        if(!isUsernameBusy(messageArray[1]))
-            sender.noUsername(messageArray[1]);
+        String recipient = messageArray[1];
+        String messageText = messageArray[2];
+        if(!isUsernameBusy(recipient))
+            sender.noUsername(recipient);
         for (ClientHandler client : clients) {
-            if(client.getUsername().equals(messageArray[1])) {
-                client.sendMessage(sender.getUsername(), sb.toString());
+            if(client.getUsername().equals(recipient)) {
+                client.sendMessage(sender.getUsername(), messageText);
                 return;
             }
+        }
+    }
+
+    public synchronized void broadcastClients(ClientHandler sender) throws IOException {
+        for (ClientHandler client : clients) {
+
+            client.sendServerMessage(String.format("%s присоеденился к чату", sender.getUsername()));
+
+            client.sendClientsList(clients);
+        }
+    }
+
+    public synchronized void broadcastClientDisconnected(ClientHandler sender) throws IOException {
+
+        for (ClientHandler client : clients) {
+            if (client == sender) {
+                continue;
+            }
+            client.sendServerMessage(String.format("%s отключился", sender.getUsername()));
+            client.sendClientsList(clients);
         }
     }
 }
