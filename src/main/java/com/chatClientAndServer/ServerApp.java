@@ -1,6 +1,6 @@
-package com.homework4;
+package com.chatClientAndServer;
 
-import com.homework4.server.ChatServer;
+import com.chatClientAndServer.server.ChatServer;
 
 import java.io.IOException;
 

@@ -1,14 +1,13 @@
-package com.homework4.server.handler;
+package com.chatClientAndServer.server.handler;
 
-import com.homework4.server.ChatServer;
-import com.homework4.server.authentication.AuthenticationService;
+import com.chatClientAndServer.server.ChatServer;
+import com.chatClientAndServer.server.authentication.AuthenticationService;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ClientHandler {
@@ -21,6 +20,11 @@ public class ClientHandler {
     private static final String STOP_SERVER_CMD_PREFIX = "/stop";
     private static final String END_CLIENT_CMD_PREFIX = "/end";
     private static final String GET_CLIENTS_CMD_PREFIX = "/getCls";
+
+    private static final String REG_CMD_PREFIX = "/reg"; //+ login + pass + username
+    private static final String REGOK_CMD_PREFIX = "/regok"; //
+    private static final String REGERR_CMD_PREFIX = "/regerr"; // + error message
+    public static final String CHANGE_USERNAME_PREFIX = "/chngname"; // + login + username
 
     private ChatServer myServer;
     private Socket clientSocket;
@@ -63,6 +67,9 @@ public class ClientHandler {
                 if (isSuccessAuth) {
                     break;
                 }
+            } else if (message.startsWith(REG_CMD_PREFIX)) {
+                processSignUp(message);
+
             } else {
                 out.writeUTF(AUTHERR_CMD_PREFIX + " Ошибка аутентификации");
                 System.out.println("Неудачная попытка аутентификации");
@@ -78,6 +85,7 @@ public class ClientHandler {
         String login = parts[1];
         String password = parts[2];
 
+
         AuthenticationService auth = myServer.getAuthenticationService();
 
         username = auth.getUsernameByLoginAndPassword(login, password);
@@ -92,6 +100,28 @@ public class ClientHandler {
             return true;
         } else {
             out.writeUTF(AUTHERR_CMD_PREFIX + " Логин или пароль не соответствуют действительности");
+            return false;
+        }
+    }
+
+    private boolean processSignUp(String message) throws IOException {
+        String[] parts = message.split("\\s+");
+        if (parts.length != 4) {
+            out.writeUTF(REGERR_CMD_PREFIX + " Ошибка регистрации. Неверный запрос");
+        }
+        String login = parts[1];
+        String password = parts[2];
+        String username = parts[3];
+
+        AuthenticationService auth = myServer.getAuthenticationService();
+
+
+        if (auth.checkLoginByFree(login)) {
+            auth.createUser(login, password, username);
+            out.writeUTF(REGOK_CMD_PREFIX);
+            return true;
+        } else {
+            out.writeUTF(REGERR_CMD_PREFIX + " Пользователь с таким логином уже существует");
             return false;
         }
     }
@@ -112,7 +142,14 @@ public class ClientHandler {
                 myServer.unSubscribe(this);
                 return;
             } else if (message.startsWith(PRIVATE_MSG_CMD_PREFIX)) {
-                myServer.privateMessage(message, this);
+                String[] messageArray = message.split(":", 3);
+                String recipient = messageArray[1];
+                String messageText = messageArray[2];
+                myServer.privateMessage(messageText, recipient, this);
+            } else if (message.startsWith(CHANGE_USERNAME_PREFIX)) {
+                String[] parts = message.split(":", 3);
+                String newUsername = parts[2];
+                myServer.updateUsername(newUsername, this);
             } else {
                 myServer.broadcastMessage(message, this);
             }
@@ -139,6 +176,10 @@ public class ClientHandler {
         return username;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public void noUsername(String wrongUser) throws IOException {
         out.writeUTF("No such user " + wrongUser);
     }
@@ -146,11 +187,12 @@ public class ClientHandler {
     public void sendClientsList(List<ClientHandler> clients) throws IOException {
         String msg = String.format("%s %s", GET_CLIENTS_CMD_PREFIX, clients.toString());
         out.writeUTF(msg);
-        System.out.println(msg);
     }
 
     @Override
     public String toString() {
         return username;
     }
+
+
 }

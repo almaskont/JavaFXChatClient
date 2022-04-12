@@ -1,10 +1,13 @@
-package com.homework4.controllers;
+package com.chatClientAndServer.controllers;
 
-import com.homework4.Application;
-import com.homework4.models.Network;
+import com.chatClientAndServer.Application;
+import com.chatClientAndServer.models.Network;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 public class AuthController {
     @FXML
@@ -15,7 +18,7 @@ public class AuthController {
     private Application application;
 
     @FXML
-    public void checkAuth() {
+    public void checkAuth(ActionEvent event) {
         String login = loginField.getText().trim();
         String password = passwordField.getText().trim();
 
@@ -27,7 +30,8 @@ public class AuthController {
         String authErrorMessage = network.sendAuthMessage(login, password);
 
         if (authErrorMessage == null) {
-            application.openChatDialog();
+            Stage stage = (Stage)((Node) event.getSource()).getScene().getWindow();
+            application.openChatDialog(stage);
         } else {
             application.showErrorAlert("Ошибка аутентификации", authErrorMessage);
         }

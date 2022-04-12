@@ -1,4 +1,4 @@
-package com.homework4.server.models;
+package com.chatClientAndServer.server.models;
 
 import lombok.Data;
 
