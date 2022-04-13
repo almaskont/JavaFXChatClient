@@ -1,8 +1,9 @@
-package com.homework4.server;
+package com.chatClientAndServer.server;
 
-import com.homework4.server.authentication.AuthenticationService;
-import com.homework4.server.authentication.BaseAuthenticationService;
-import com.homework4.server.handler.ClientHandler;
+import com.chatClientAndServer.server.authentication.AuthenticationService;
+import com.chatClientAndServer.server.authentication.BaseAuthenticationService;
+import com.chatClientAndServer.server.authentication.DBAuthenticationService;
+import com.chatClientAndServer.server.handler.ClientHandler;
 
 
 import java.io.IOException;
@@ -18,11 +19,12 @@ public class ChatServer {
 
     public ChatServer(int port) throws IOException {
         serverSocket = new ServerSocket(port);
-        authenticationService = new BaseAuthenticationService();
+        authenticationService = new DBAuthenticationService();
         clients = new ArrayList<>();
     }
 
     public void start() {
+        authenticationService.startAuthentication();
         System.out.println("СЕРВЕР ЗАПУЩЕН!");
         System.out.println("----------------");
 
@@ -82,22 +84,13 @@ public class ChatServer {
         broadcastMessage(message, sender, false);
     }
 
-    public synchronized void privateMessage(String message, ClientHandler sender) throws IOException {
-        String[] messageArray = message.split("\\s", 3);
-        if (messageArray.length < 3) {
-            sender.sendMessage(sender.getUsername(), "вы отправили пустое сообщение");
-            return;
-        }
-        String recipient = messageArray[1];
-        String messageText = messageArray[2];
-        if(!isUsernameBusy(recipient))
-            sender.noUsername(recipient);
+    public synchronized void privateMessage(String messageText, String recipient, ClientHandler sender) throws IOException {
         for (ClientHandler client : clients) {
-            if(client.getUsername().equals(recipient)) {
+            if (client.getUsername().equals(recipient)) {
                 client.sendMessage(sender.getUsername(), messageText);
-                return;
             }
         }
+
     }
 
     public synchronized void broadcastClients(ClientHandler sender) throws IOException {
@@ -118,5 +111,18 @@ public class ChatServer {
             client.sendServerMessage(String.format("%s отключился", sender.getUsername()));
             client.sendClientsList(clients);
         }
+    }
+
+    public synchronized void updateClients() throws IOException {
+        for (ClientHandler client : clients) {
+            client.sendClientsList(clients);
+            System.out.println(client.getUsername());
+        }
+    }
+
+    public void updateUsername(String newUsername, ClientHandler client) throws IOException {
+        authenticationService.updateUsername(client.getUsername(), newUsername);
+        client.setUsername(newUsername);
+        updateClients();
     }
 }

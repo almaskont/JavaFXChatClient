@@ -1,14 +1,12 @@
-package com.homework4.models;
+package com.chatClientAndServer.models;
 
-import com.homework4.controllers.Controller;
+import com.chatClientAndServer.controllers.Controller;
 import javafx.application.Platform;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 
 public class Network {
@@ -21,6 +19,12 @@ public class Network {
     private static final String STOP_SERVER_CMD_PREFIX = "/stop";
     private static final String END_CLIENT_CMD_PREFIX = "/end";
     private static final String GET_CLIENTS_CMD_PREFIX = "/getCls";
+
+    private static final String REG_CMD_PREFIX = "/reg"; //+ login + pass + username
+    private static final String REGOK_CMD_PREFIX = "/regok"; //
+    private static final String REGERR_CMD_PREFIX = "/regerr"; // + error message
+    public static final String CHANGE_USERNAME_PREFIX = "/chngname"; // + login + username
+
     public static final String DEFAULT_HOST = "localhost";
     public static final int DEFAULT_PORT = 8186;
     private DataInputStream in;
@@ -120,6 +124,27 @@ public class Network {
     }
 
     public void sendPrivateMessage(String selectedRecipient, String message) {
-        sendMessage(String.format("%s %s %s", PRIVATE_MSG_CMD_PREFIX, selectedRecipient, message));
+        sendMessage(String.format("%s:%s:%s", PRIVATE_MSG_CMD_PREFIX, selectedRecipient, message));
+    }
+
+    public String sendSignUpMessage(String login, String password, String username) {
+        try {
+            out.writeUTF(String.format("%s %s %s %s", REG_CMD_PREFIX, login, password, username));
+            String response = in.readUTF();
+            if (response.startsWith(REGOK_CMD_PREFIX)) {
+                return null;
+            } else {
+                return response.split("\\s+", 2)[1];
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
+
+    }
+
+    public void sendChangeUsernameMessage(String newUsername) {
+        this.username = newUsername;
+        sendMessage(String.format("%s:%s:%s", CHANGE_USERNAME_PREFIX, username, newUsername));
     }
 }

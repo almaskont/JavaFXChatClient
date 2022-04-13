@@ -1,6 +1,6 @@
-package com.homework4.server.authentication;
+package com.chatClientAndServer.server.authentication;
 
-import com.homework4.server.models.User;
+import com.chatClientAndServer.server.models.User;
 
 import java.util.List;
 
@@ -19,6 +19,21 @@ public class BaseAuthenticationService implements AuthenticationService{
                 return client.getUsername();
             }
         }
+        return null;
+    }
+
+    @Override
+    public void createUser(String login, String password, String username) {
+
+    }
+
+    @Override
+    public void updateUsername(String login, String newUsername) {
+
+    }
+
+    @Override
+    public Boolean checkLoginByFree(String login) {
         return null;
     }
 

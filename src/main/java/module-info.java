@@ -10,9 +10,10 @@ module gb.demo.lesson4.lesson4 {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires lombok;
+    requires java.sql;
 
-    opens com.homework4 to javafx.fxml;
-    exports com.homework4;
-    exports com.homework4.controllers;
-    opens com.homework4.controllers to javafx.fxml;
+    opens com.chatClientAndServer to javafx.fxml;
+    exports com.chatClientAndServer;
+    exports com.chatClientAndServer.controllers;
+    opens com.chatClientAndServer.controllers to javafx.fxml;
 }

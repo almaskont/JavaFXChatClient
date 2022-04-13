@@ -15,12 +15,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.homework4.controllers.Controller">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chatClientAndServer.controllers.Controller">
    <top>
       <MenuBar style="-fx-background-color: rgb(223, 246, 255);" BorderPane.alignment="CENTER">
         <menus>
           <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
             <items>
+                  <MenuItem fx:id="changeUsernameButton" mnemonicParsing="false" onAction="#changeUsername" text="Change Username" />
               <MenuItem mnemonicParsing="false" text="Close" />
             </items>
           </Menu>
