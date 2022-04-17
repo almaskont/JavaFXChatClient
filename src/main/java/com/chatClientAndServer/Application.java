@@ -69,6 +69,7 @@ public class Application extends javafx.application.Application {
         primaryStage.show();
         primaryStage.setTitle(network.getUsername());
         network.waitMessage(chatController);
+        network.readChatHistory(chatController);
         chatController.setUsernameTitle(network.getUsername());
     }
 

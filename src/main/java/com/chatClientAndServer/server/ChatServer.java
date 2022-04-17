@@ -6,7 +6,7 @@ import com.chatClientAndServer.server.authentication.DBAuthenticationService;
 import com.chatClientAndServer.server.handler.ClientHandler;
 
 
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -90,7 +90,6 @@ public class ChatServer {
                 client.sendMessage(sender.getUsername(), messageText);
             }
         }
-
     }
 
     public synchronized void broadcastClients(ClientHandler sender) throws IOException {
@@ -125,4 +124,5 @@ public class ChatServer {
         client.setUsername(newUsername);
         updateClients();
     }
+
 }
