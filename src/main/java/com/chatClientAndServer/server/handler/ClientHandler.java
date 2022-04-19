@@ -29,7 +29,6 @@ public class ClientHandler {
     private ChatServer myServer;
     private Socket clientSocket;
     private DataOutputStream out;
-    private ObjectOutputStream objOut;
     private DataInputStream in;
     private String username;
 
@@ -165,11 +164,11 @@ public class ClientHandler {
     }
 
     public void sendServerMessage(String message) throws IOException {
-        out.writeUTF(String.format("%s %s", SERVER_MSG_CMD_PREFIX, message));
+        out.writeUTF(String.format("%s:%s", SERVER_MSG_CMD_PREFIX, message));
     }
 
     public void sendClientMessage(String sender, String message) throws IOException {
-        out.writeUTF(String.format("%s %s %s", CLIENT_MSG_CMD_PREFIX, sender, message));
+        out.writeUTF(String.format("%s:%s:%s", CLIENT_MSG_CMD_PREFIX, sender, message));
     }
 
     public String getUsername() {
@@ -178,10 +177,6 @@ public class ClientHandler {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public void noUsername(String wrongUser) throws IOException {
-        out.writeUTF("No such user " + wrongUser);
     }
 
     public void sendClientsList(List<ClientHandler> clients) throws IOException {

@@ -3,12 +3,9 @@ package com.chatClientAndServer.controllers;
 import com.chatClientAndServer.Application;
 import com.chatClientAndServer.models.Network;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
@@ -17,10 +14,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,13 +59,7 @@ public class Controller {
     private ScrollPane userScroll;
 
     @FXML
-    private VBox usersNames = new VBox();
-
-    @FXML
     private Label userName;
-
-    @FXML
-    private Button closeAboutButton;
 
     private Network network;
 
@@ -93,20 +82,22 @@ public class Controller {
     void sendMessage() {
         String messageSend = textArea.getText().trim();
         textArea.clear();
-
+        String strDate = new SimpleDateFormat("dd.MM HH:mm").format(new Date());
         if (messageSend.trim().isEmpty()) return;
 
         if (selectedRecipient != null) {
             network.sendPrivateMessage(selectedRecipient, messageSend);
-            appendMessage("To: " + selectedRecipient + "\n" + messageSend);
+
+            appendMessage("To: " + selectedRecipient + "\n" + messageSend, strDate);
+            network.writeChatHistory(messageSend, "To: " + selectedRecipient, strDate);
         } else {
             network.sendMessage(messageSend);
-            appendMessage(messageSend);
+            appendMessage(messageSend, strDate);
+            network.writeChatHistory(messageSend, "", strDate);
         }
     }
 
-    public void appendMessage(String messageSend) {
-        String strDate = new SimpleDateFormat("dd.MM HH:mm").format(new Date());
+    public void appendMessage(String messageSend, String strDate) {
         HBox messageBox = new HBox();
         messageBox.setAlignment(Pos.CENTER_RIGHT);
         messageBox.setPadding(new Insets(5, 10, 5, 10));
@@ -115,18 +106,13 @@ public class Controller {
         textFlow.setStyle("-fx-color: rgb(238, 238, 238); " +
                 "-fx-background-color: rgb(45, 49, 250); " +
                 "-fx-background-radius: 15px;");
-        textFlow.setPadding(new Insets(5, 10, 5, 10));
-        text.setFill(Color.color(0.934, 0.945, 0.996));
-        messageBox.getChildren().add(textFlow);
-        Platform.runLater(() -> messageBoard.getChildren().add(messageBox));
-        messageScroll.vvalueProperty().bind(messageBoard.heightProperty());
+        sendingMessageBox(textFlow, text, messageBox);
     }
 
-    public void appendServerMessage(String messageSend) {
+    public void appendServerMessage(String messageSend, String strDate) {
         String[] messageArray = messageSend.split(":", 2);
         String sender = messageArray[0];
         String message = messageArray[1];
-        String strDate = new SimpleDateFormat("dd.MM HH:mm").format(new Date());
         HBox messageBox = new HBox();
         messageBox.setAlignment(Pos.CENTER_LEFT);
         messageBox.setPadding(new Insets(5, 10, 5, 10));
@@ -135,6 +121,10 @@ public class Controller {
         textFlow.setStyle("-fx-color: rgb(238, 238, 238); " +
                 "-fx-background-color: rgb(93, 139, 244); " +
                 "-fx-background-radius: 15px;");
+        sendingMessageBox(textFlow, text, messageBox);
+    }
+
+    private void sendingMessageBox(TextFlow textFlow, Text text, HBox messageBox) {
         textFlow.setPadding(new Insets(5, 10, 5, 10));
         text.setFill(Color.color(0.934, 0.945, 0.996));
         messageBox.getChildren().add(textFlow);

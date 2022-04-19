@@ -3,10 +3,10 @@ package com.chatClientAndServer.models;
 import com.chatClientAndServer.controllers.Controller;
 import javafx.application.Platform;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class Network {
@@ -33,6 +33,7 @@ public class Network {
     private final String host;
     private final int port;
     private String username;
+    private final String chatHistoryFilePath = "src/main/resources/chatHistory";
 
     public Network(String host, int port) {
         this.host = host;
@@ -78,14 +79,18 @@ public class Network {
                     String message = in.readUTF();
 
                     if (message.startsWith(CLIENT_MSG_CMD_PREFIX)) {
-                        String[] parts= message.split("\\s+", 3);
+                        String[] parts = message.split(":", 3);
                         String sender = parts[1];
                         String messageFromSender = parts[2];
-                        Platform.runLater(() -> controller.appendServerMessage(String.format("%s: %s", sender, messageFromSender)));
+                        String strDate = new SimpleDateFormat("dd.MM HH:mm").format(new Date());
+                        writeChatHistory(messageFromSender, "From: " + sender, strDate);
+                        Platform.runLater(() -> controller.appendServerMessage(String.format("%s: %s", sender, messageFromSender), strDate));
                     } else if (message.startsWith(SERVER_MSG_CMD_PREFIX)) {
-                        String[] parts = message.split("\\s+", 2);
+                        String[] parts = message.split(":", 2);
                         String serverMessage = parts[1];
-                        Platform.runLater(() -> controller.appendMessage(serverMessage));
+                        String strDate = new SimpleDateFormat("dd.MM HH:mm").format(new Date());
+                        writeChatHistory(serverMessage, "", strDate);
+                        Platform.runLater(() -> controller.appendMessage(serverMessage, strDate));
                     } else if (message.startsWith(GET_CLIENTS_CMD_PREFIX)) {
                         message = message.substring(message.indexOf('[') + 1, message.indexOf(']'));
                         String[] users = message.split(", ");
@@ -99,6 +104,51 @@ public class Network {
 
         t.setDaemon(true);
         t.start();
+    }
+
+    public void writeChatHistory(String message, String user, String date) {
+        String fileName = "chatHistoryOf" + username + ".txt";
+        File file = new File(chatHistoryFilePath, fileName);
+        String messageWithDate = ((user.isEmpty()) ? (message + "~" + date) : (message + "~" + date + "~" + user));
+        try (FileWriter writer = new FileWriter(file, true)) {
+            if (file.exists()) {
+                writer.write(messageWithDate + "\n");
+            } else {
+                file.createNewFile();
+                writer.write(messageWithDate);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void readChatHistory(Controller controller) {
+        String fileName = "chatHistoryOf" + username + ".txt";
+        File file = new File("src/main/resources/chatHistory", fileName);
+        String line;
+        if (!file.exists())
+            return;
+        try (FileReader fileReader = new FileReader(file)) {
+            BufferedReader br = new BufferedReader(fileReader);
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split("~");
+                String message = parts[0];
+                String date = parts[1];
+                if (parts.length == 3) {
+                    String user = parts[2];
+                    if (user.startsWith("From: ")) {
+                        user = user.replaceFirst("From: ", "");
+                        controller.appendServerMessage(String.format("%s: %s", user, message), date);
+                    } else {
+                        controller.appendMessage(user + "\n" + message, date);
+                    }
+                    continue;
+                }
+                controller.appendMessage(message, date);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public String sendAuthMessage(String login, String password) {
