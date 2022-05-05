@@ -1,7 +1,6 @@
 package com.chatClientAndServer.server;
 
 import com.chatClientAndServer.server.authentication.AuthenticationService;
-import com.chatClientAndServer.server.authentication.BaseAuthenticationService;
 import com.chatClientAndServer.server.authentication.DBAuthenticationService;
 import com.chatClientAndServer.server.handler.ClientHandler;
 
@@ -11,11 +10,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class ChatServer {
     private final ServerSocket serverSocket;
     private final AuthenticationService authenticationService;
     private final List<ClientHandler> clients;
+
+    private Logger file = Logger.getLogger(ChatServer.class.getName());
 
     public ChatServer(int port) throws IOException {
         serverSocket = new ServerSocket(port);
@@ -25,11 +27,10 @@ public class ChatServer {
 
     public void start() {
         authenticationService.startAuthentication();
-        System.out.println("СЕРВЕР ЗАПУЩЕН!");
-        System.out.println("----------------");
+        file.info("СЕРВЕР ЗАПУЩЕН!");
 
         try {
-            while(true) {
+            while (true) {
                 waitAndProcessNewClientConnection();
             }
         } catch (IOException e) {
@@ -38,9 +39,9 @@ public class ChatServer {
     }
 
     private void waitAndProcessNewClientConnection() throws IOException {
-        System.out.println("Ожидание клиента...");
+        file.info("Ожидание клиента...");
         Socket socket = serverSocket.accept();
-        System.out.println("Клиент подключился!");
+        file.info("Клиент подключился!");
 
         processClientConnection(socket);
     }
@@ -116,7 +117,6 @@ public class ChatServer {
     public synchronized void updateClients() throws IOException {
         for (ClientHandler client : clients) {
             client.sendClientsList(clients);
-            System.out.println(client.getUsername());
         }
     }
 
